@@ -1,5 +1,5 @@
 class API {
-    constructor(mockEnabled = false) {
+    constructor(mockEnabled = true) {
         this.baseUrl = 'https://asia-east1-crypto-calculus.cloudfunctions.net/visualization_api';
         this.orderBookCollectUrl = 'https://asia-east1-crypto-calculus.cloudfunctions.net/collect_orderbook';
         this.mockEnabled = mockEnabled;
