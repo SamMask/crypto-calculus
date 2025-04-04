@@ -114,7 +114,7 @@ async function loadPriceData() {
         const timeframe = getSelectedTimeframe();
         
         // 獲取API實例
-        const api = new API(true); // 確保啟用模擬數據
+        const api = new API(false); // 使用真實數據
         
         // 加載價格和交易量數據
         const priceData = await api.getPriceData(symbol, timeframe, 100);
@@ -140,7 +140,13 @@ async function loadPriceData() {
         console.error('載入價格數據失敗:', error);
         
         // 發生錯誤時使用模擬數據
-        const mockApi = new API(true);
+        console.warn('無法連接到實時數據，使用模擬數據作為備份');
+        const mockApi = new API(true); // 顯式啟用模擬數據
+        const mockData = mockApi.getMockPriceData(getSelectedSymbol(), getSelectedTimeframe(), 100);
+        
+        // 創建模擬API實例作為備份
+        console.warn('無法連接到實時數據，使用模擬數據作為備份');
+        const mockApi = new API(true); // 顯式啟用模擬數據
         const mockData = mockApi.getMockPriceData(getSelectedSymbol(), getSelectedTimeframe(), 100);
         
         // 更新圖表
@@ -159,7 +165,7 @@ async function loadDerivativesData() {
         const timeframe = getSelectedTimeframe();
         
         // 獲取API實例
-        const api = new API(true); // 確保啟用模擬數據
+        const api = new API(false); // 使用真實數據
         
         // 加載衍生指標數據
         const derivativesData = await api.getDerivativesData(symbol, timeframe, 100);
@@ -221,16 +227,16 @@ async function loadDerivativesData() {
     }
 }
 
-// 加載訂單簿數據
+// 載入訂單簿數據
 async function loadOrderbookData() {
     try {
-        // 獲取當前選擇的交易對
+        // 獲取當前選中的交易對
         const symbol = getSelectedSymbol();
         
         // 獲取API實例
-        const api = new API(true); // 確保啟用模擬數據
+        const api = new API(false); // 使用真實數據
         
-        // 獲取訂單簿數據
+        // 加載訂單簿數據
         const orderbookData = await api.getOrderbookData(symbol);
         
         // 檢查訂單簿數據是否有效
