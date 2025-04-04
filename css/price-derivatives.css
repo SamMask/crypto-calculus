@@ -1,0 +1,92 @@
+/**
+ * 價格導數指標相關樣式
+ */
+
+/* 導數圖表容器 */
+.derivatives-container {
+    width: 100%;
+    background-color: #f7f7f7;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+/* 導數指標標題 */
+.derivatives-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* 導數指標值 */
+.derivative-value {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* 導數指標說明 */
+.derivative-description {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* 導數顏色樣式 */
+.velocity-positive {
+    color: #4CAF50;
+}
+
+.velocity-negative {
+    color: #E91E63;
+}
+
+.acceleration-positive {
+    color: #2196F3;
+}
+
+.acceleration-negative {
+    color: #FF9800;
+}
+
+.turning-point-buy {
+    color: #4CAF50;
+    background-color: rgba(76, 175, 80, 0.1);
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.turning-point-sell {
+    color: #E91E63;
+    background-color: rgba(233, 30, 99, 0.1);
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+/* 導數圖表標籤 */
+.derivative-label {
+    font-size: 11px;
+    color: #555;
+    margin-right: 10px;
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+    .derivatives-container {
+        padding: 5px;
+    }
+    
+    .derivatives-title {
+        font-size: 13px;
+    }
+    
+    .derivative-value {
+        font-size: 14px;
+    }
+    
+    .derivative-description {
+        font-size: 11px;
+    }
+} 

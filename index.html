@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加密貨幣微積分分析儀表板</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/price-derivatives.css">
+    <link rel="stylesheet" href="css/orderbookGradient.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <!-- 引入 TradingView 輕量級圖表庫 (更新版本) -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">Crypto Calculus</div>
+        <div class="symbol-info">
+            <span class="current-symbol">BTC/USDT</span>
+            <span class="price-change negative">-0.24%</span>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="toolbar">
+            <div class="exchange-selector">
+                <label for="exchange-select">交易所:</label>
+                <select id="exchange-select">
+                    <option value="binance">Binance</option>
+                    <option value="okx">OKX</option>
+                    <option value="bybit">Bybit</option>
+                </select>
+            </div>
+            <div class="pair-selector">
+                <label for="pair-select">交易對:</label>
+                <select id="pair-select">
+                    <option value="BTCUSDT">BTC/USDT</option>
+                    <option value="ETHUSDT">ETH/USDT</option>
+                    <option value="BNBUSDT">BNB/USDT</option>
+                    <option value="DOGEUSDT">DOGE/USDT</option>
+                </select>
+            </div>
+            <div class="timeframe-selector">
+                <label for="timeframe-select">時間框架:</label>
+                <select id="timeframe-select">
+                    <option value="1m">1分鐘</option>
+                    <option value="5m">5分鐘</option>
+                    <option value="15m">15分鐘</option>
+                    <option value="1h" selected>1小時</option>
+                    <option value="4h">4小時</option>
+                    <option value="1d">1天</option>
+                </select>
+            </div>
+            <div class="controls">
+                <button id="sync-charts-button" class="control-button">圖表同步：開</button>
+                <button id="refresh-button" class="control-button">刷新數據</button>
+                <label class="toggle-container">
+                    <input type="checkbox" id="persistent-levels-toggle" checked>
+                    <span class="toggle-label">持續支撐/阻力位</span>
+                </label>
+            </div>
+            <div id="loading-indicator" class="status-indicator">載入中...</div>
+            <div id="error-indicator" class="status-indicator error">錯誤</div>
+        </div>
+        
+        <div class="price-display">
+            <span class="price-label">當前價格:</span>
+            <span id="last-price" class="price-value">--.--</span>
+        </div>
+        
+        <div class="dashboard-layout">
+            <!-- 左側主圖表區域 -->
+            <div class="main-chart-area">
+                <div class="charts">
+                    <div id="price-chart"></div>
+                    <div id="volume-chart"></div>
+                    <div id="indicators-chart"></div>
+                </div>
+                
+                <div class="advanced-indicators-container">
+                    <div class="panel-title">高級指標面板</div>
+                    <div class="advanced-indicators-grid">
+                        <div class="indicator-card">
+                            <div class="indicator-title">價格曲率指標</div>
+                            <div id="curvature-value" class="signal-value">0.0032 (平穩趨勢)</div>
+                            <div class="indicator-description">曲率值反映價格曲線的彎曲程度，高曲率表示急劇轉折點</div>
+                        </div>
+                        
+                        <div class="indicator-card">
+                            <div class="indicator-title">價格彈性指標 (當前值)</div>
+                            <div id="elasticity-value" class="signal-value positive">0.28 (正常彈性)</div>
+                            <div class="indicator-description">價格變化與成交量變化的比率，反映市場深度</div>
+                        </div>
+                        
+                        <div class="indicator-card">
+                            <div class="indicator-title">訂單簿梯度指標</div>
+                            <div id="gradient-value" class="signal-value">53.2% (買賣平衡)</div>
+                            <div class="indicator-description">買賣訂單壓力分布，百分比表示買方佔比</div>
+                        </div>
+                        
+                        <div class="indicator-card">
+                            <div class="indicator-title">市場熵指標</div>
+                            <div id="entropy-value" class="signal-value neutral">0.48 (中度無序)</div>
+                            <div class="indicator-description">測量市場隨機性與可預測性，值越高表示越混沌</div>
+                            <div class="entropy-trend trend-description">市場混沌度穩定</div>
+                        </div>
+                        
+                        <div class="indicator-card">
+                            <div class="indicator-title">布林帶寬度指標</div>
+                            <div id="bandwidth-value" class="signal-value">2.86 (中度波動)</div>
+                            <div class="indicator-description">衡量價格的離散程度，寬度增加通常預示大幅波動</div>
+                        </div>
+                        
+                        <div class="indicator-card">
+                            <div class="indicator-title">價格波動率指標</div>
+                            <div id="volatility-value" class="signal-value neutral">1.24% (正常波動)</div>
+                            <div class="indicator-description">測量價格波動的激烈程度，較高值表示市場不穩定</div>
+                        </div>
+                    </div>
+                    
+                    <div id="advanced-indicators"></div>
+                </div>
+            </div>
+            
+            <!-- 右側資訊面板 -->
+            <div class="info-panel-container">
+                <!-- 訂單簿區塊 -->
+                <div class="info-panel orderbook-panel">
+                    <div class="panel-title">訂單簿</div>
+                    <div class="orderbook">
+                        <div class="orderbook-header">
+                            <span>價格(USDT)</span>
+                            <span>數量(BTC)</span>
+                            <span>總額</span>
+                        </div>
+                        <div id="orderbook-asks"></div>
+                        <div class="spread">
+                            <span class="spread-value">價差: $8.50 (0.01%)</span>
+                        </div>
+                        <div id="orderbook-bids"></div>
+                    </div>
+                    
+                    <!-- 訂單簿梯度分析 -->
+                    <div class="panel-title gradient-title">訂單簿梯度</div>
+                    <div id="orderbook-gradient-container"></div>
+                </div>
+                
+                <!-- 交易信號和預測區塊 -->
+                <div class="info-panel signals-panel">
+                    <!-- 交易信號 -->
+                    <div class="panel-section">
+                        <div class="panel-title">交易信號</div>
+                        <div class="signals">
+                            <div class="signal-item">
+                                <div class="signal-name">趨勢拐點</div>
+                                <div class="signal-value">
+                                    <span class="buy-signal"></span> 買入信號: 3個
+                                </div>
+                                <div class="signal-value">
+                                    <span class="sell-signal"></span> 賣出信號: 2個
+                                </div>
+                            </div>
+                            <div class="signal-item">
+                                <div class="signal-name">波動率趨勢<span class="trend-label">歷史變化</span></div>
+                                <div class="signal-value neutral">1.24% (趨向收斂)</div>
+                                <div class="trend-description">未來價格波動預期逐漸減小</div>
+                            </div>
+                            <div class="signal-item">
+                                <div class="signal-name">布林帶狀態</div>
+                                <div id="bollinger-state" class="signal-value positive">擠壓狀態 (突破預警)</div>
+                            </div>
+                            <div class="signal-item">
+                                <div class="signal-name">買賣力量比</div>
+                                <div class="signal-value negative">0.85 (賣方略強)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 極限點預測 -->
+                    <div class="panel-section">
+                        <div class="panel-title">極限點預測</div>
+                        <div class="signals">
+                            <div class="signal-item">
+                                <div class="signal-name">潛在頂部</div>
+                                <div class="signal-value top-prediction">$82,850 (距今約7根K線)</div>
+                            </div>
+                            <div class="signal-item">
+                                <div class="signal-name">潛在底部</div>
+                                <div class="signal-value bottom-prediction">$80,950 (距今約5根K線)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 市場深度信息 -->
+                    <div class="panel-section">
+                        <div class="panel-title">市場深度分析</div>
+                        <div class="depth-analysis">
+                            <div class="depth-item">
+                                <div class="depth-label">流動性指數</div>
+                                <div class="depth-value positive">6.82 (良好)</div>
+                            </div>
+                            <div class="depth-item">
+                                <div class="depth-label">重要價格區間</div>
+                                <div class="depth-value">$79,500 - $81,200</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="indicators-legend">
+                <span class="legend-item">
+                    <span class="legend-color" style="background-color: #4CAF50;"></span>
+                    <span class="legend-text">價格變化率 (一階導數)</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-color" style="background-color: #E91E63;"></span>
+                    <span class="legend-text">價格加速度 (二階導數)</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-color" style="background-color: #FFB74D;"></span>
+                    <span class="legend-text">價格曲率 (熱力圖)</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-color" style="background-color: #9C27B0;"></span>
+                    <span class="legend-text">市場熵</span>
+                </span>
+                <span class="legend-item">
+                    <span class="buy-signal"></span>
+                    <span class="legend-text">買入信號</span>
+                </span>
+                <span class="legend-item">
+                    <span class="sell-signal"></span>
+                    <span class="legend-text">賣出信號</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-color gradient-buy"></span>
+                    <span class="legend-text">訂單簿買方梯度</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-color gradient-sell"></span>
+                    <span class="legend-text">訂單簿賣方梯度</span>
+                </span>
+            </div>
+            <p>© 2025 Crypto Calculus - 基於微積分原理的加密貨幣交易分析平台</p>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/orderbookGradient.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html> 
